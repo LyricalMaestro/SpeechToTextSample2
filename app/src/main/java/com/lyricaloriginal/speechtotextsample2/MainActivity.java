@@ -24,7 +24,6 @@ import java.util.Properties;
 public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
 
     private static final String TAG = MainActivity.class.getName();
-    private static final String URL = "wss://stream.watsonplatform.net/speech-to-text/api";
 
     private boolean mIsRecording = false;
     private TextView mMsgTextView;
@@ -35,11 +34,6 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        SpeechToText.sharedInstance().initWithContext(
-                URI.create(URL),
-                this.getApplicationContext(),
-                new SpeechConfiguration());
 
         mMsgTextView = (TextView) findViewById(R.id.msg_textview);
         mRecordingBtn = (Button) findViewById(R.id.recording_btn);
