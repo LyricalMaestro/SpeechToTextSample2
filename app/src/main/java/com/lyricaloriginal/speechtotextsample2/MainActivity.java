@@ -11,24 +11,24 @@ import android.widget.Toast;
 
 import com.ibm.watson.developer_cloud.android.speech_to_text.v1.ISpeechDelegate;
 import com.ibm.watson.developer_cloud.android.speech_to_text.v1.SpeechToText;
-import com.ibm.watson.developer_cloud.android.speech_to_text.v1.dto.SpeechConfiguration;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Properties;
 
 public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
 
     private static final String TAG = MainActivity.class.getName();
 
-    private boolean mIsRecording = false;
     private TextView mMsgTextView;
     private Button mRecordingBtn;
+
     private String mRecognitionResults = "";
+    private TaskDisplayMsg mTaskDisplayMsg = new TaskDisplayMsg();
+    private boolean mIsRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
                 } else {
                     SpeechToText.sharedInstance().recognize();
                 }
+                v.setEnabled(false);
             }
         });
     }
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
             public void run() {
                 mIsRecording = true;
                 mRecordingBtn.setText("Stop Recording");
+                mRecordingBtn.setEnabled(true);
                 Toast.makeText(MainActivity.this, "onOpen", Toast.LENGTH_LONG).show();
             }
         });
@@ -88,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
                 Toast.makeText(MainActivity.this, "onError " + s, Toast.LENGTH_LONG).show();
             }
         });
-
     }
 
     @Override
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
             public void run() {
                 mIsRecording = false;
                 mRecordingBtn.setText("Start Recording");
+                mRecordingBtn.setEnabled(true);
                 Toast.makeText(MainActivity.this, "onClose", Toast.LENGTH_LONG).show();
             }
         });
@@ -139,17 +141,13 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
         }
     }
 
-    public void displayResult(final String result) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mMsgTextView.setText(result);
-            }
-        });
-    }
-
     @Override
     public void onAmplitude(double v, double v1) {
+    }
+
+    private void displayResult(final String result) {
+        mTaskDisplayMsg.setMsg(result);
+        runOnUiThread(mTaskDisplayMsg);
     }
 
     /**
@@ -164,5 +162,22 @@ public class MainActivity extends AppCompatActivity implements ISpeechDelegate {
         String username = properties.getProperty("username");
         String password = properties.getProperty("password");
         return new Pair<String, String>(username, password);
+    }
+
+    private class TaskDisplayMsg implements Runnable {
+
+        private String mMsg = "";
+
+        void setMsg(String msg) {
+            if (msg == null) {
+                return;
+            }
+            mMsg = msg;
+        }
+
+        @Override
+        public void run() {
+            mMsgTextView.setText(mMsg);
+        }
     }
 }
